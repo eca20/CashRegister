@@ -6,6 +6,9 @@ frontend revision was verified in the working checkout and rebuilt in Docker.
 The earlier clean-checkout baseline remains documented below; it predates this
 frontend revision.
 
+Frontend source revision: `d513ecb0819f7440526947eb5d80c88749190951`.
+The follow-up documentation commit records this revision without changing code.
+
 ## Original clean-checkout baseline
 
 Source: `abb03256d5725dd35780f2d1cae415a0f90249b0`. Exported that commit using `git archive` into an empty temporary directory and
