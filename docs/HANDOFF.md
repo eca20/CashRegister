@@ -18,6 +18,8 @@ It is not publicly deployed. The implementation is committed locally on
    assumption, random distribution, greedy-table constraint and extension point.
 3. Read `test/core.test.ts` for the independent oracle and random invariants.
 4. Review the decision log and architecture tradeoffs.
+   The service integration guide also explains future database/API wiring and
+   current stateless defaults; `docs/openapi.json` describes the HTTP contract.
 5. Replace or explicitly adopt the attributed self-critique draft in your own voice.
 
 ## Remaining submission steps

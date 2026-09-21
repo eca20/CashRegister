@@ -3,7 +3,13 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import { readFile } from "node:fs/promises";
 import { resolve, sep, extname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { processFile, divisibleBy } from "./register.js";
+import { randomUUID } from "node:crypto";
+import {
+  createChangeService,
+  DependencyUnavailableError,
+  InvalidCalculationError,
+} from "./application/change-service.js";
+import type { ChangeService } from "./application/change-service.js";
 import { MAX_INPUT_BYTES, MAX_REQUEST_BYTES } from "./limits.js";
 
 const defaultWebRoot = fileURLToPath(
@@ -55,6 +61,9 @@ async function readJson(request: IncomingMessage): Promise<unknown> {
 async function calculate(
   request: IncomingMessage,
   response: ServerResponse,
+  service: ChangeService,
+  requestId: string,
+  timeoutMs: number,
 ): Promise<void> {
   const value = await readJson(request);
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
@@ -82,23 +91,56 @@ async function calculate(
   const divisor = body.divisor === undefined ? 3 : body.divisor;
   if (typeof divisor !== "number")
     throw new HttpError(400, "Divisor must be a positive safe integer.");
+  if (response.destroyed) return;
+  const controller = new AbortController();
+  const cancel = () => controller.abort();
+  response.once("close", cancel);
+  const timer = setTimeout(cancel, timeoutMs);
+  let abortListener: () => void = () => {};
+  const aborted = new Promise<never>((_resolve, reject) => {
+    abortListener = () =>
+      reject(new HttpError(504, "Calculation timed out or was cancelled."));
+    controller.signal.addEventListener("abort", abortListener, { once: true });
+  });
   try {
-    const output = processFile(body.input, {
-      currency,
-      rules: [divisibleBy(divisor)],
-    });
-    json(response, 200, { output });
-  } catch (error) {
-    throw new HttpError(
-      422,
-      error instanceof Error ? error.message : "Unable to process input.",
-    );
+    const result = await Promise.race([
+      service.calculate(
+        { input: body.input, currency, divisor },
+        {
+          requestId,
+          signal: controller.signal,
+        },
+      ),
+      aborted,
+    ]);
+    if (!response.destroyed) json(response, 200, result);
+  } finally {
+    clearTimeout(timer);
+    response.off("close", cancel);
+    controller.signal.removeEventListener("abort", abortListener);
   }
 }
 
-export function createAppServer(webRoot = defaultWebRoot) {
-  const root = resolve(webRoot);
+export interface AppServerOptions {
+  readonly webRoot?: string;
+  readonly serveWeb?: boolean;
+  readonly service?: ChangeService;
+  readonly requestTimeoutMs?: number;
+  readonly isReady?: () => boolean;
+}
+
+export function createAppServer(options: AppServerOptions = {}) {
+  const root = resolve(options.webRoot ?? defaultWebRoot);
+  const service = options.service ?? createChangeService();
+  const timeoutMs = options.requestTimeoutMs ?? 10_000;
   const server = createServer(async (request, response) => {
+    const suppliedId = request.headers["x-request-id"];
+    const requestId =
+      typeof suppliedId === "string" &&
+      /^[a-zA-Z0-9._-]{1,128}$/.test(suppliedId)
+        ? suppliedId
+        : randomUUID();
+    response.setHeader("X-Request-ID", requestId);
     response.setHeader("X-Content-Type-Options", "nosniff");
     response.setHeader("Cache-Control", "no-store");
     response.setHeader(
@@ -107,14 +149,29 @@ export function createAppServer(webRoot = defaultWebRoot) {
     );
     try {
       const url = new URL(request.url ?? "/", "http://localhost");
+      if (url.pathname === "/health/live" || url.pathname === "/health/ready") {
+        if (request.method !== "GET") {
+          response.setHeader("Allow", "GET");
+          throw new HttpError(405, "Use GET for health checks.");
+        }
+        const ready =
+          url.pathname === "/health/live" || (options.isReady?.() ?? true);
+        json(response, ready ? 200 : 503, {
+          status: ready ? "ok" : "unavailable",
+        });
+        return;
+      }
       if (url.pathname === "/api/change") {
         if (request.method !== "POST") {
           response.setHeader("Allow", "POST");
           throw new HttpError(405, "Use POST for /api/change.");
         }
-        await calculate(request, response);
+        if (options.isReady && !options.isReady())
+          throw new HttpError(503, "Service is not ready.");
+        await calculate(request, response, service, requestId, timeoutMs);
         return;
       }
+      if (options.serveWeb === false) throw new HttpError(404, "Not found.");
       if (request.method !== "GET")
         throw new HttpError(405, "Use GET for static files.");
       const name =
@@ -139,15 +196,21 @@ export function createAppServer(webRoot = defaultWebRoot) {
       response.writeHead(200, { "Content-Type": types[extname(path)]! });
       response.end(contents);
     } catch (error) {
+      if (response.destroyed) return;
       if (error instanceof HttpError)
         json(response, error.status, { error: error.message });
+      else if (error instanceof InvalidCalculationError)
+        json(response, 422, { error: error.message });
+      else if (error instanceof DependencyUnavailableError)
+        json(response, 503, {
+          error: "A required service dependency is unavailable.",
+        });
       else if (error instanceof URIError)
         json(response, 400, { error: "Invalid URL encoding." });
       else json(response, 500, { error: "Unexpected server error." });
     }
   });
-  server.requestTimeout = 10_000;
-  server.headersTimeout = 10_000;
-  server.setTimeout(10_000, (socket) => socket.destroy());
+  server.requestTimeout = timeoutMs;
+  server.headersTimeout = timeoutMs;
   return server;
 }

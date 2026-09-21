@@ -1,15 +1,21 @@
-import { createAppServer } from "./server.js";
+import { readConfig } from "./config.js";
+import { createServiceRuntime } from "./runtime.js";
 
-const port = Number(process.env.PORT ?? 3000);
-if (!Number.isInteger(port) || port < 1 || port > 65535)
-  throw new Error("PORT must be 1..65535.");
-const host = process.env.HOST ?? "127.0.0.1";
-const server = createAppServer();
-server.listen(port, host, () => {
-  console.log(`Cash Register: http://${host}:${port}`);
+// Composition root: construct future adapters here, inject the service and
+// register their cleanup with the runtime. Defaults perform no external I/O.
+const config = readConfig();
+const runtime = createServiceRuntime(config);
+runtime.server.listen(config.port, config.host, () => {
+  console.log(`Cash Register: http://${config.host}:${config.port}`);
 });
+let shuttingDown = false;
 for (const signal of ["SIGINT", "SIGTERM"] as const) {
   process.on(signal, () => {
-    server.close();
+    if (shuttingDown) return;
+    shuttingDown = true;
+    void runtime.stop().catch(() => {
+      console.error("Unable to finish service shutdown within its deadline.");
+      process.exit(1);
+    });
   });
 }

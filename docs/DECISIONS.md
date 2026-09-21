@@ -101,3 +101,25 @@ long-amount font at narrow widths and added an input-specific overflow assertion
 This corrected generated CSS based on visual evidence, not a change to the money
 limit. Tests and native browser paste verification supplement, rather than replace,
 Ed's eventual personal review.
+
+## D16 — Scaffold one service in a larger system
+
+Ed asked for the ability to add outbound APIs and input/output persistence later,
+without implementing those integrations now. The assistant retained the pure
+calculation core and CLI, extracted an async `ChangeService` boundary from HTTP,
+and added an optional `CalculationRepository` interface. The default wiring has
+no repository, outbound calls or new runtime dependencies.
+
+The scaffold includes a composition root, validated environment settings,
+headless mode, correlation IDs, cancellation/deadlines, health/readiness and
+bounded shutdown with injectable cleanup. A repository, when explicitly supplied,
+must save successfully before the request returns success; failures are surfaced
+as 503 rather than being hidden. Only complete valid calculations are offered for
+storage, with immutable submitted input/settings/output snapshots.
+
+Future outbound clients belong in adapters behind business-specific interfaces.
+No generic HTTP-client framework or speculative external business operation was
+invented. OpenAPI and integration notes show the current contract and extension
+points. Authentication, schema, idempotency, retries and cross-service consistency
+remain decisions for actual integrations; a request ID does not imply exactly-once
+execution. Fakes verify these boundaries without connecting external services.

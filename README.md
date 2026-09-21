@@ -107,11 +107,28 @@ See [architecture](docs/ARCHITECTURE.md) for extension examples and tradeoffs.
 
 ```sh
 docker build -t truefit-cash-register .
-docker run --rm -p 127.0.0.1:3000:3000 truefit-cash-register
+docker run --rm --stop-timeout 20 -p 127.0.0.1:3000:3000 truefit-cash-register
 ```
 
 The container runs as non-root with compiled code/static assets. The local server
 binds to loopback by default; the container binds to its own network interface.
+
+## Service integration scaffold
+
+The app can run as one service in a larger system. `SERVE_WEB=false npm run serve`
+exposes the calculation API and health endpoints without serving the frontend.
+The default service remains stateless and makes no external calls.
+
+An injectable async application service separates HTTP from the pure calculator.
+Future database adapters implement `CalculationRepository`; future API clients
+plug into application services at the same boundary. Request IDs, cancellation,
+validated configuration, readiness and shutdown/cleanup hooks are in place.
+The file CLI remains independent of service integrations.
+
+See the [integration guide](docs/SERVICE_INTEGRATION.md),
+[OpenAPI contract](docs/openapi.json), and [environment example](.env.example).
+The guide documents persistence failure semantics and the decisions needed when
+real integrations are added. No database, remote client or retry policy is installed.
 
 ## AI use and submission
 

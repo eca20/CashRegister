@@ -4,9 +4,10 @@ The required behavior is a small batch transformation. The senior full-stack rol
 motivates a React interface and HTTP adapter; the CLI directly implements the brief.
 
 ```text
-File → CLI ───────────────────┐
-                             ├→ parse → select rule → make change → validate → format
-React → POST /api/change ─────┘
+File → CLI ───────────────────────────────┐
+                                         ├→ pure calculation core
+React / service → HTTP → ChangeService ──┘
+                              └→ optional repository (none configured)
 ```
 
 ## Boundaries
@@ -18,6 +19,11 @@ React → POST /api/change ─────┘
 - `register.ts`: file/transaction parsing and ordered rule selection.
 - `cli.ts`: bounded reads, UTF-8, exclusive output creation, diagnostics/exit codes.
 - `server.ts`: validated HTTP requests, limits, responses and static assets.
+- `application/change-service.ts`: asynchronous use case, optional persistence
+  interface and typed failures; default calculation remains stateless.
+- `config.ts`, `runtime.ts`, `serve.ts`: environment configuration, composition,
+  health/readiness and bounded shutdown with adapter cleanup.
+- `adapters/`: integration guidance for future database and outbound API adapters.
 - `web/App.tsx`: mode/input state, the shared HTTP request handler, validation,
   errors and downloads; `main.tsx` only mounts React.
 - `web/entry.ts`: bounded cents entry and integer display formatting; decimal
@@ -77,11 +83,18 @@ Success: `200 {"output":"3 quarters,1 dime,3 pennies\n"}`. Errors return
 422 invalid transaction or numeric divisor. Omitted settings default; invalid
 and unknown fields are rejected. Other API methods return 405. Results are not cached.
 
+The handler now calls an injected `ChangeService`; business validation remains 422,
+expected dependency failures return 503, unexpected errors return a generic 500,
+and the calculation deadline returns 504. Correlation uses `X-Request-ID`.
+Readiness/liveness routes are available with or without the frontend. See the
+[OpenAPI contract](openapi.json) and [service integration guide](SERVICE_INTEGRATION.md).
+
 ## Production scope
 
-One stateless process serves the UI and calculation requests. Protections include
+By default one stateless process serves the UI and calculation requests. Protections include
 bounded buffering, strict runtime/UTF-8 validation, timeouts, same-origin requests,
-browser content policy and static-path containment. Input is not logged or stored.
+browser content policy and static-path containment. Input is not logged or stored
+unless a future repository is explicitly supplied.
 The container is non-root. These are concrete protections, not a claim of production
 readiness.
 
@@ -90,6 +103,8 @@ rate/concurrency limits, observability and operational ownership. Larger batches
 could need worker isolation: timeouts do not interrupt synchronous CPU work.
 
 No current requirement calls for a database, broker, GraphQL or Kubernetes.
+The service scaffold isolates integration adapters and provides lifecycle hooks;
+it does not select or implement that infrastructure.
 Actual drawer inventory would change this: selection must consider available
 counts; dispensing needs an atomic, auditable transaction and idempotency. A retry
 must not dispense twice. Such requirements would justify persistence.

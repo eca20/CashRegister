@@ -30,3 +30,12 @@ Docker rebuilt the same local demo. CSS produces all materials; Web Audio produc
 optional clicks/chimes. No image generator, external assets, animation library or
 additional AI agent was used. These are human product decisions and AI-authored
 implementation/verification, not a claim that Ed has finished a code review.
+
+## Service scaffold
+
+Ed requested future integration readiness without implementing database or API
+functionality. Codex inspected the existing boundaries, wrote the service/config/
+lifecycle scaffold and OpenAPI/integration documentation, and used Node tests with
+fake repositories/services to check async behavior and failure semantics. Existing
+core/CLI tests and Chromium workflows provide regression evidence. No external
+service, database, paid platform, additional agent or new package was introduced.

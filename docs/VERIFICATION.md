@@ -1,13 +1,53 @@
 # Verification
 
 Recorded September 21, 2026. Commands were executed by Codex; this is not a claim
-of independent human review. The AI also authored the tests. The skeuomorphic
-frontend revision was verified in the working checkout and rebuilt in Docker.
-The earlier clean-checkout baseline remains documented below; it predates this
-frontend revision.
+of independent human review. The AI also authored the tests. The frontend revision
+and subsequent service scaffold were verified in the working checkout and rebuilt
+in Docker. The earlier clean-checkout baseline remains documented below; it
+predates both revisions.
 
 Frontend source revision: `d513ecb0819f7440526947eb5d80c88749190951`.
 The follow-up documentation commit records this revision without changing code.
+
+## Service scaffold checks
+
+The service scaffold retains the core, CLI, frontend and dependency lockfile.
+HTTP now delegates through an async application interface. Verification uses fake
+repositories/services; no database or external API is configured or contacted.
+
+| Check                                  | Result                                                                                                                                                        |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run check`                        | Passed: formatting, strict type checks, production build and all 44 Node tests                                                                                |
+| `npx playwright test` after that build | All 28 existing Register/Batch desktop/mobile checks passed                                                                                                   |
+| Container build                        | Node 22 production image rebuilt successfully                                                                                                                 |
+| Headless container smoke test          | `SERVE_WEB=false`, `PORT=3001`: health checks and exact calculation succeeded; root returned 404; correlation ID preserved; UID 1000 and read-only filesystem |
+
+The headless smoke container shut down on SIGTERM with exit code 0 and was
+removed. The local demo was refreshed on port 3180; Docker reports healthy, the
+read-only setting remains enabled and the sample still returns exact change.
+
+The 14 new Node checks exercise the actual extension points:
+
+- Default application service returns the existing core's result.
+- Optional repository receives a frozen input/settings/output record and the same
+  request context; success waits for completion and later caller mutations do not
+  alter the record.
+- A malformed later row and invalid divisor prevent all persistence; repository
+  errors retain an internal cause but expose a generic 503 at HTTP.
+- Cancellation is observed before work, after asynchronous storage, at the HTTP
+  deadline and when a client disconnects. Even an uncooperative async fake cannot
+  leave the HTTP request waiting beyond the deadline.
+- Validated defaults/headless configuration reject malformed environment values.
+- API and health checks work without web assets; unavailable readiness gates new
+  calculations while liveness stays independent.
+- Injected asynchronous services receive normalized requests, bounded correlation
+  IDs and abort signals; unexpected failures return generic 500 responses.
+- Shutdown drains an active request before adapter disposal, runs disposal only
+  once, bounds stalled cleanup and accepts an injected dependency-readiness hook.
+
+No real database atomicity, remote response contract, retry/idempotency guarantee,
+cross-service transaction or production load behavior is claimed. Core coverage
+percentages below are the original baseline, not refreshed service-layer coverage.
 
 ## Original clean-checkout baseline
 

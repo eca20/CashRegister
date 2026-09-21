@@ -1,0 +1,220 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Cash Register Service",
+    "version": "1.0.0",
+    "description": "Stateless by default. No database or outbound API integration is enabled. X-Request-ID is correlation metadata, not an idempotency key."
+  },
+  "paths": {
+    "/api/change": {
+      "post": {
+        "summary": "Calculate one transaction or a complete batch",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Request-ID",
+            "required": false,
+            "description": "Preserved only when valid; otherwise the service generates a UUID.",
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9._-]{1,128}$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["input"],
+                "additionalProperties": false,
+                "properties": {
+                  "input": {
+                    "type": "string",
+                    "description": "UTF-8 owed,paid rows; at most 1 MiB of text. Nonnegative amounts up to 10000000.00 with at most two decimal places. Optional BOM and final LF; CRLF accepted. Empty input is valid; blank rows and underpayment fail the batch.",
+                    "examples": ["2.12,3.00"]
+                  },
+                  "currency": {
+                    "type": "string",
+                    "enum": ["USD", "EUR"],
+                    "default": "USD"
+                  },
+                  "divisor": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 9007199254740991,
+                    "default": 3,
+                    "description": "Random denominations when owed cents are divisible by this value; zero owed also matches."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Complete calculation output; no partial batch success.",
+            "headers": {
+              "X-Request-ID": {
+                "$ref": "#/components/headers/RequestId"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["output"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "output": {
+                      "type": "string",
+                      "description": "One comma-separated denomination breakdown per input row, final LF for nonempty output."
+                    }
+                  }
+                },
+                "example": {
+                  "output": "3 quarters,1 dime,3 pennies\n"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error",
+            "description": "Malformed request, unsupported currency or invalid field type."
+          },
+          "405": {
+            "$ref": "#/components/responses/Error",
+            "description": "Method not allowed."
+          },
+          "413": {
+            "$ref": "#/components/responses/Error",
+            "description": "Input exceeds 1 MiB or body exceeds 2 MiB."
+          },
+          "415": {
+            "$ref": "#/components/responses/Error",
+            "description": "Content-Type must be application/json."
+          },
+          "422": {
+            "$ref": "#/components/responses/Error",
+            "description": "Invalid transaction or numeric divisor."
+          },
+          "500": {
+            "$ref": "#/components/responses/Error",
+            "description": "Unexpected internal failure; private details omitted."
+          },
+          "503": {
+            "$ref": "#/components/responses/Error",
+            "description": "Service not ready or a required integration failed."
+          },
+          "504": {
+            "$ref": "#/components/responses/Error",
+            "description": "Calculation deadline exceeded."
+          }
+        }
+      }
+    },
+    "/health/live": {
+      "get": {
+        "summary": "Process liveness",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["status"],
+                  "properties": {
+                    "status": {
+                      "const": "ok"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "405": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/health/ready": {
+      "get": {
+        "summary": "Readiness to accept calculations",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["status"],
+                  "properties": {
+                    "status": {
+                      "const": "ok"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "405": {
+            "$ref": "#/components/responses/Error"
+          },
+          "503": {
+            "description": "Draining or an injected readiness hook reports unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["status"],
+                  "properties": {
+                    "status": {
+                      "const": "unavailable"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "headers": {
+      "RequestId": {
+        "description": "Supplied valid correlation ID or generated UUID.",
+        "schema": {
+          "type": "string"
+        }
+      }
+    },
+    "responses": {
+      "Error": {
+        "description": "Error response",
+        "headers": {
+          "X-Request-ID": {
+            "$ref": "#/components/headers/RequestId"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": ["error"],
+              "additionalProperties": false,
+              "properties": {
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

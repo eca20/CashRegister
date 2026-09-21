@@ -3,10 +3,12 @@ import type { TestContext } from "node:test";
 import assert from "node:assert/strict";
 import type { AddressInfo } from "node:net";
 import { createAppServer } from "../src/server.js";
+import type { AppServerOptions } from "../src/server.js";
+import { createChangeService } from "../src/application/change-service.js";
 import { MAX_INPUT_BYTES, MAX_REQUEST_BYTES } from "../src/limits.js";
 
-async function start(t: TestContext) {
-  const server = createAppServer();
+async function start(t: TestContext, options: AppServerOptions = {}) {
+  const server = createAppServer(options);
   await new Promise<void>((resolve, reject) => {
     server.once("error", reject);
     server.listen(0, "127.0.0.1", resolve);
@@ -45,6 +47,133 @@ test("HTTP adapter shares file calculation, defaults, EUR and divisor settings",
   });
   assert.deepEqual(await (await post({ input: "" })).json(), { output: "" });
 });
+
+test("headless service exposes calculation and health without requiring built UI assets", async (t) => {
+  let ready = true;
+  const { post, base } = await start(t, {
+    serveWeb: false,
+    webRoot: "/nonexistent-assets",
+    isReady: () => ready,
+  });
+  assert.equal((await fetch(base)).status, 404);
+  assert.equal((await post({ input: "1.00,1.00" })).status, 200);
+  for (const path of ["/health/live", "/health/ready"]) {
+    const response = await fetch(`${base}${path}`);
+    assert.equal(response.status, 200);
+    assert.deepEqual(await response.json(), { status: "ok" });
+    const wrongMethod = await fetch(`${base}${path}`, { method: "POST" });
+    assert.equal(wrongMethod.status, 405);
+    assert.equal(wrongMethod.headers.get("allow"), "GET");
+  }
+  ready = false;
+  assert.equal((await fetch(`${base}/health/ready`)).status, 503);
+  assert.equal((await fetch(`${base}/health/live`)).status, 200);
+  assert.equal((await post({ input: "1.00,1.00" })).status, 503);
+});
+
+test("HTTP calls an injected async service and propagates bounded request IDs", async (t) => {
+  const { base } = await start(t, {
+    service: {
+      async calculate(command, context) {
+        assert.deepEqual(command, {
+          input: "1.00,2.00",
+          currency: "USD",
+          divisor: 3,
+        });
+        assert.ok(!context.signal.aborted);
+        return { output: context.requestId };
+      },
+    },
+  });
+  for (const id of ["checkout-123", "x".repeat(129), "unsafe/id"]) {
+    const response = await fetch(`${base}/api/change`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Request-ID": id },
+      body: JSON.stringify({ input: "1.00,2.00" }),
+    });
+    const received = response.headers.get("x-request-id");
+    assert.deepEqual(await response.json(), { output: received });
+    if (id === "checkout-123") assert.equal(received, id);
+    else assert.match(received!, /^[0-9a-f-]{36}$/);
+  }
+});
+
+test("dependency and unexpected errors use distinct statuses without exposing adapter details", async (t) => {
+  const service = createChangeService({
+    repository: {
+      async save() {
+        throw new Error("private DB credentials");
+      },
+    },
+  });
+  const { post } = await start(t, { service });
+  const unavailable = await post({ input: "1.00,1.00" });
+  assert.equal(unavailable.status, 503);
+  assert.deepEqual(await unavailable.json(), {
+    error: "A required service dependency is unavailable.",
+  });
+  const unexpected = await start(t, {
+    service: {
+      async calculate() {
+        throw new Error("private upstream details");
+      },
+    },
+  });
+  const failure = await unexpected.post({ input: "1.00,1.00" });
+  assert.equal(failure.status, 500);
+  assert.deepEqual(await failure.json(), { error: "Unexpected server error." });
+});
+
+test("deadline aborts a slow service and returns 504 even if it ignores cancellation", async (t) => {
+  let signal: AbortSignal | undefined;
+  const { post } = await start(t, {
+    requestTimeoutMs: 30,
+    service: {
+      async calculate(_command, context) {
+        signal = context.signal;
+        return new Promise(() => {});
+      },
+    },
+  });
+  const response = await post({ input: "1.00,1.00" });
+  assert.equal(response.status, 504);
+  assert.ok(signal?.aborted);
+});
+
+test(
+  "client disconnect aborts the context supplied to a future adapter",
+  { timeout: 5000 },
+  async (t) => {
+    let started!: () => void;
+    let cancelled!: () => void;
+    const ready = new Promise<void>((resolve) => {
+      started = resolve;
+    });
+    const cancellation = new Promise<void>((resolve) => {
+      cancelled = resolve;
+    });
+    const { base } = await start(t, {
+      service: {
+        async calculate(_command, context) {
+          context.signal.addEventListener("abort", cancelled, { once: true });
+          started();
+          return new Promise(() => {});
+        },
+      },
+    });
+    const controller = new AbortController();
+    const pending = fetch(`${base}/api/change`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ input: "1.00,1.00" }),
+      signal: controller.signal,
+    });
+    await ready;
+    controller.abort();
+    await assert.rejects(pending, { name: "AbortError" });
+    await cancellation;
+  },
+);
 
 test("API rejects malformed contracts, invalid money and unsupported settings", async (t) => {
   const { post, base } = await start(t);

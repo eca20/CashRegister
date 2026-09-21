@@ -9,3 +9,6 @@ coverage/
 *.tsbuildinfo
 change.txt
 euro-change.txt
+.env
+.env.*
+!.env.example
