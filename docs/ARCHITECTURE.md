@@ -18,7 +18,12 @@ React → POST /api/change ─────┘
 - `register.ts`: file/transaction parsing and ordered rule selection.
 - `cli.ts`: bounded reads, UTF-8, exclusive output creation, diagnostics/exit codes.
 - `server.ts`: validated HTTP requests, limits, responses and static assets.
-- `web/main.tsx`: user interaction, request state, errors and downloads.
+- `web/App.tsx`: mode/input state, the shared HTTP request handler, validation,
+  errors and downloads; `main.tsx` only mounts React.
+- `web/entry.ts`: bounded cents entry and integer display formatting; decimal
+  paste reuses the core money parser rather than introducing a second grammar.
+- `web/components/`: Register entry, Batch editor and receipt presentation.
+- `web/useRegisterSound.ts`: optional, isolated Web Audio feedback.
 
 The core imports no file, server or React APIs. Injected randomness makes it
 deterministic in tests. No DI container is needed. Server runtime uses Node built-ins.
@@ -89,5 +94,28 @@ Actual drawer inventory would change this: selection must consider available
 counts; dispensing needs an atomic, auditable transaction and idempotency. A retry
 must not dispense twice. Such requirements would justify persistence.
 
-Random output intentionally changes across requests. A physical receipt workflow
-should persist the accepted breakdown or use a transaction identifier.
+## Frontend state and materials
+
+Register sends one canonical `owed,paid` row to the same endpoint as Batch. The
+server's denomination string is authoritative. A receipt holds the submitted
+amounts, mode, currency, divisor and returned output together; its displayed total
+is integer subtraction of that snapshot, not a second denomination algorithm.
+The complete output is retained for download while only 100 rows are rendered.
+
+Amount entry is append-style cents entry, with full-selection replacement and
+backspace. Read-only, focusable amount inputs keep native mobile keyboards from
+competing with the dedicated keypad; scoped keyboard/paste handlers provide
+desktop entry without intercepting browser shortcuts or normal navigation.
+Inputs are retained separately for each mode. Editing, switching modes or changing
+settings invalidates the receipt. Mutable controls are disabled during requests
+and file reads, with a revision guard against outdated async results.
+
+CSS gradients, borders and shadows provide plastic, metal, display and paper
+materials without image assets or a fixed-size appliance composition. Native
+buttons, labels, expandable settings and live status/error messages remain HTML.
+The layout supports 320px screens and reduced motion. Audio is created only after
+the user enables it; errors disable sound without escaping into calculation flow.
+
+State lasts only for the current page load. Random output intentionally changes
+across requests; a physical dispensing workflow would need persisted accepted
+breakdowns or transaction identifiers, beyond this calculation demo.

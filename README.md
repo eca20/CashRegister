@@ -33,10 +33,28 @@ a nonzero exit code. The original input and previous outputs cannot be overwritt
 npm run serve
 ```
 
-Open [localhost:3000](http://127.0.0.1:3000). Paste/upload transactions, choose
-USD/EUR and a divisor, calculate and download the output. Editing inputs clears
-old results; recalculating can change random results. Large batches preview the
-first 100 rows; downloads retain every row.
+Open [localhost:3000](http://127.0.0.1:3000). The page is the register: ivory raised
+keys, recessed green displays, brushed-metal controls and a paper receipt, built
+with CSS and ordinary HTML. It adapts from a two-column desktop workspace to a
+single column on mobile.
+
+- **Register** starts with both amounts at zero and owed selected. Click either
+  display or the owed/paid key to select it. Digits enter cents: `213` becomes
+  `2.13`. `00`, Backspace and Clear edit the selected amount. With a display
+  focused, keyboard digits work the same way; Delete/Escape clear it. Select-all
+  replaces the amount. Enter advances from owed to paid, then calculates.
+- Paste digits as cents, or paste a decimal amount such as `2.13`. Pasting replaces
+  the selected amount. Invalid or oversized entries show an error and preserve
+  the previously accepted amount; they are never silently clamped.
+- **Batch** keeps the editor, upload and sample workflow. Large batches preview
+  the first 100 rows; downloads retain every row in the original output format.
+- **Settings** expands to currency and random divisor. Its summary shows the
+  active values. Inputs persist between modes, but editing inputs, changing
+  modes or changing settings clears previous results. Recalculating can change
+  random denominations.
+- **Sound** is off on each page load. Opt in for quiet key clicks and a brief
+  chime; audio failure does not affect calculations. Reduced-motion preferences
+  disable key movement and receipt animation.
 
 For frontend development, keep the server running and run `npm run dev` in another
 terminal. Vite proxies `/api` to port 3000. Node serves the production assets.
@@ -98,8 +116,9 @@ binds to loopback by default; the container binds to its own network interface.
 ## AI use and submission
 
 Codex (GPT-6 Astra) generated implementation, tests and initial documentation. Ed
-supplied the brief and role context and approved the approach. Human review is
-recorded separately rather than implied.
+supplied the brief and role context, approved the approach, and directed the
+skeuomorphic revision: the page itself functions as the register. Human design
+feedback and pending code review are recorded separately.
 
 | Requested item             | Artifact                                                                                                |
 | -------------------------- | ------------------------------------------------------------------------------------------------------- |

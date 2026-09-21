@@ -18,3 +18,15 @@ and actual file/HTTP/browser tests reduce shared-assumption risk.
 
 The app itself does not call AI. Arithmetic and file processing do not benefit
 from an uncertain, paid model call at runtime.
+
+## Frontend revision
+
+Ed supplied the visual critique, corrected the literal-register direction and
+approved the detailed interaction plan. Codex generated the revised React/CSS,
+adapted Batch tests, and added Register tests. TypeScript checked the shared
+boundaries; Playwright exercised desktop/Pixel 7 behavior and a 320px viewport.
+The Codex browser provided visual inspection and native keyboard/clipboard checks.
+Docker rebuilt the same local demo. CSS produces all materials; Web Audio produces
+optional clicks/chimes. No image generator, external assets, animation library or
+additional AI agent was used. These are human product decisions and AI-authored
+implementation/verification, not a claim that Ed has finished a code review.

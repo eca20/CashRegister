@@ -58,3 +58,46 @@ local environment metadata. Preserved it unchanged in an ignored private folder
 with a checksum and cutoff; did not silently redact it or publish it to GitHub.
 The personal critique remains an explicitly AI-authored draft until Ed reviews
 and supplies or adopts his own answer. No rejected human decision was invented.
+
+## D13 — Ed's correction: the page is the register
+
+Ed judged the original AI-generated frontend functionally sufficient but visually
+lacking, and requested a 2000s skeuomorphic revision. He explicitly ruled out a
+picture of a register sitting on a wood counter: **the page itself functions as
+the register**. The accepted plan applies materials to usable controls and page
+surfaces. Literal appliance outlines, scenery, drawers and hardware illustrations
+were excluded because they would compete with a fluid desktop/mobile interface.
+
+The assistant replaced the minimal frontend with CSS plastic/metal surfaces,
+recessed green amount displays, raised keys and paper receipts. No generated
+image, decorative drawer or fixed perspective composition was used. This is a
+human-directed modification of AI output; Ed has not claimed line-level code
+authorship or completed code review.
+
+## D14 — Register entry alongside the original Batch contract
+
+Implemented the approved defaults: Register mode, zero amounts, owed selected,
+automatic cents (`213` → `2.13`), explicit field selection, `00`, backspace and
+Clear. Keyboard handling is scoped to focused amount displays and leaves modifier
+shortcuts and navigation alone. Digit-only paste means cents; decimal paste uses
+the existing parser. Rejected values leave the accepted amount intact and show an
+error instead of clamping.
+
+The assistant used small entry, batch, receipt and sound modules around one state
+coordinator. Both modes call the unchanged API. Receipts capture the submitted
+state and use server denominations; edits/mode/settings invalidate them, and
+in-flight requests lock mutable controls. Batch preview and full download behavior
+are preserved. These implementation choices are AI-authored within Ed's plan.
+
+## D15 — Restrained feedback and verification-driven correction
+
+The approved plan replaces drawer animation with receipt feed and subtle success
+status. Sound is opt-in on every load, and audio failures are isolated. Reduced
+motion removes movement. Native HTML keeps labels, focus and status announcements.
+
+Browser tests passed at 320px, but visual inspection found the final digit of a
+maximum amount slightly clipped inside its input. The assistant reduced the
+long-amount font at narrow widths and added an input-specific overflow assertion.
+This corrected generated CSS based on visual evidence, not a change to the money
+limit. Tests and native browser paste verification supplement, rather than replace,
+Ed's eventual personal review.

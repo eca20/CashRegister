@@ -11,8 +11,9 @@ It is not publicly deployed. The implementation is committed locally on
 
 ## Review in five minutes
 
-1. Run the sample in the UI, change the divisor/currency, enter an underpayment,
-   and download a valid result.
+1. In Register, enter `212` owed and `300` paid and calculate. Try keypad, keyboard,
+   paste and Clear. In Batch, run the sample and download it. Expand Settings to
+   change currency/divisor; try underpayment, sound and the mobile layout.
 2. Read `src/money.ts`, `change.ts` and `register.ts`; explain the divisibility
    assumption, random distribution, greedy-table constraint and extension point.
 3. Read `test/core.test.ts` for the independent oracle and random invariants.

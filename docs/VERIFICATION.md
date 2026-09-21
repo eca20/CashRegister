@@ -1,20 +1,21 @@
 # Verification
 
 Recorded September 21, 2026. Commands were executed by Codex; this is not a claim
-of independent human review. The AI also authored the tests. The source revision tested from a clean checkout was
-`abb03256d5725dd35780f2d1cae415a0f90249b0`. Subsequent changes only update
-verification/handoff documentation.
+of independent human review. The AI also authored the tests. The skeuomorphic
+frontend revision was verified in the working checkout and rebuilt in Docker.
+The earlier clean-checkout baseline remains documented below; it predates this
+frontend revision.
 
-## Clean-checkout verification
+## Original clean-checkout baseline
 
-Exported that commit using `git archive` into an empty temporary directory and
+Source: `abb03256d5725dd35780f2d1cae415a0f90249b0`. Exported that commit using `git archive` into an empty temporary directory and
 selected Node v22.18.0 explicitly. `npm ci --offline --ignore-scripts` from the
 populated package cache, `npm run check`, and `npm run test:e2e` all exited 0.
 The clean copy had no existing dependencies or build output. Online `npm ci`
 also succeeded in the Linux Node 22 Docker build. Earlier development checks used
 Node v23.4.0. No claim is made that remote GitHub CI has run.
 
-## Executed checks
+## Original baseline checks
 
 | Check                                     | Result                                                                                                                                                                     |
 | ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -29,6 +30,61 @@ Node v23.4.0. No claim is made that remote GitHub CI has run.
 Coverage numbers refer to Node-instrumented compiled modules, not frontend coverage.
 The browser checks are separate; coverage percentages do not prove correctness.
 Global coverage includes test code and is intentionally not used as a quality claim.
+
+## Frontend revision checks
+
+The implementation and tests for “the page is the register” were verified locally
+with Node v23.4.0; the production container build uses Node 22. The dependency
+lockfile, core, CLI and API source/tests are unchanged. No new dependency was added.
+
+| Check                                         | Result                                                                                                                                           |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Formatting and TypeScript                     | `npm run format:check` and `npm run typecheck` passed                                                                                            |
+| Production build                              | `npm run build` passed; React components and shared money parser bundled successfully                                                            |
+| Core/CLI/API regression                       | `node --test dist/test/*.test.js`: all 30 passed with loopback access                                                                            |
+| Browser regression and new Register scenarios | `npm run test:e2e`: 28 passed; final `npx playwright test` rerun after narrow-screen CSS correction: 28 passed                                   |
+| Docker                                        | `docker build -t truefit-cash-register .` passed; replaced the local demo container on port 3180                                                 |
+| Container smoke check                         | HTTP sample returned `3 quarters,1 dime,3 pennies`; process UID 1000, read-only filesystem retained                                              |
+| Visual inspection                             | Desktop Register/Batch, 320px Register, expanded settings, underpayment errors and long denomination receipt inspected in the Codex browser      |
+| Native interaction                            | Keyboard entry and Enter-to-advance/submit worked; native clipboard paste accepted a maximum decimal amount and invalidated the previous receipt |
+
+The sandbox initially prevented the four HTTP tests from binding loopback; the
+unchanged suite passed with local-network permission. A successful browser suite
+alone did not catch a maximum amount clipping inside its input at 320px. Visual
+inspection caught it, CSS was corrected, and an input-specific overflow assertion
+was added before the final passing browser run.
+
+### Frontend requirement mapping
+
+All 14 scenarios run in both desktop Chromium and Pixel 7 emulation (28 checks).
+`e2e/batch.spec.ts` preserves the four original Batch scenarios; the ten new
+`e2e/register.spec.ts` scenarios cover:
+
+- Register defaults, collapsed settings, muted audio, explicit selection, automatic
+  cents, `00`, backspace and Clear.
+- Keyboard parity, select-all replacement, modifier shortcuts, Tab navigation,
+  Enter-to-advance/submit, exact API request and expected server breakdown.
+- Digit and decimal paste, whitespace, leading zeros, invalid text, negatives,
+  scientific notation, excess precision and amounts beyond the existing limit.
+- Keyboard/keypad maximum rejection without clamping, accepted value preservation
+  and recovery by editing.
+- Preserved inputs across modes, with receipts/downloads invalidated by input,
+  currency, divisor and mode changes; keyboard tab selection.
+- Delayed requests disable all mutable controls; receipts retain submitted amounts
+  and display an intentionally alternative valid server breakdown (`88 pennies`),
+  proving the UI does not recalculate denominations.
+- Underpayment, invalid divisor and recovery; the original network-failure test
+  remains in Batch coverage.
+- Audio opt-in/mute/reset, deliberately unavailable AudioContext, and successful
+  calculation despite audio failure. Subjective sound quality was not measured.
+- Reduced-motion receipt animation suppression and visible keyboard focus.
+- 320px maximum amount display, error rendering, long receipts, 44px control
+  targets and no horizontal overflow; a 125-row batch renders 100 preview rows.
+
+Batch checks still verify exact downloaded bytes including all 125 rows, uploads,
+sample/manual input, currency/divisor, line-specific errors and stale results.
+Browser paste scenarios dispatch ClipboardEvents; native desktop paste was checked
+separately. Mobile emulation is not a real-device clipboard or audio audit.
 
 ## Requirement-to-test mapping
 
