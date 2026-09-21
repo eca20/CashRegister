@@ -1,0 +1,10 @@
+node_modules
+dist
+web-dist
+test-results
+playwright-report
+coverage
+.submission-private
+docs/ai/transcripts
+docs/ORIGINAL_BRIEF.md
+package-lock.json

@@ -1,0 +1,11 @@
+node_modules/
+dist/
+web-dist/
+test-results/
+playwright-report/
+coverage/
+.DS_Store
+.submission-private/
+*.tsbuildinfo
+change.txt
+euro-change.txt
