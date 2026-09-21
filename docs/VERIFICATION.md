@@ -11,6 +11,9 @@ The follow-up documentation commit records this revision without changing code.
 
 ## Service scaffold checks
 
+Verified source revision: `eccbec00215aa971898f47dc3a3464d6781aeabf`.
+The following documentation commit only records this identifier.
+
 The service scaffold retains the core, CLI, frontend and dependency lockfile.
 HTTP now delegates through an async application interface. Verification uses fake
 repositories/services; no database or external API is configured or contacted.
