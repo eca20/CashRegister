@@ -24,6 +24,21 @@ model/tool state and embedded media carry explicit markers. The redacted log is
 not presented as an unmodified raw export. CI evidence for the pushed revision
 is available on the fork/PR; the historical local results below remain unchanged.
 
+## README and screenshot follow-up
+
+The reviewer quick start was exercised locally: `npm ci`, `npm run build`, then
+`npm run serve` successfully served the production app at `http://127.0.0.1:3000`.
+The screenshot script entered 212 owed and 300 paid through the visible keypad at
+1440 × 1000 desktop and 390 × 844 mobile/touch viewports. It confirmed 0.88 change,
+`3 quarters, 1 dime, 3 pennies`, and an enabled download before saving both full-page
+PNGs. Both images were visually inspected for complete content and readable layout.
+
+The script uses the real API with no interception, reduced motion, and the default
+muted audio. Screenshot generation is documentation tooling, not another browser
+regression suite. App source and dependencies are unchanged. PowerShell and
+physical-phone/LAN instructions were checked against configuration but not executed
+on Windows or a physical phone; Docker evidence remains the earlier checks below.
+
 ## Service scaffold checks
 
 Verified source revision: `eccbec00215aa971898f47dc3a3464d6781aeabf`.

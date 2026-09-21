@@ -140,3 +140,18 @@ readable version is supplementary. The log is clearly labeled as redacted, with
 source/output hashes and event counts; it is not claimed to be an unmodified raw
 export. Generic rules and private identifier substitutions were tested and the
 actual artifacts scanned before publication.
+
+## D18 — Reviewer startup guide and real browser screenshots
+
+After submission, Ed asked for clearer startup/access instructions and desktop
+and mobile screenshots. Codex moved a complete web quick start ahead of the CLI,
+identified the submission branch and exact browser URL, and added a reproducible
+sample transaction. Docker, phone/LAN access, frontend development, and common
+startup errors have separate instructions to make each entry point clear.
+
+The screenshots are actual Chromium captures against the production build and
+real calculation API, using visible keypad input. The mobile capture uses touch
+emulation and the full scrollable page. No generated imagery or fabricated
+receipt was used. A small capture script and reproduction notes accompany the
+images. This documentation follow-up is after the published transcript's declared
+cutoff; the original transcript artifact remains unchanged.

@@ -22,7 +22,13 @@ The app itself is not publicly hosted; reviewers can run it locally or in Docker
 
 ## Review in five minutes
 
-1. Run the CLI against `examples/input.txt` and inspect the output.
+Start with the [web quick start](../README.md#start-the-web-app), including the
+submission-branch clone command, browser URL and sample transaction. The README
+also covers Docker, phone access and separate CLI/development workflows, with
+[desktop and mobile screenshots](../README.md#screenshots).
+
+1. Run the [CLI example](../README.md#run-the-file-cli) against `examples/input.txt`
+   and inspect the output.
 2. In Register, enter `212` owed and `300` paid. Try keypad, keyboard, paste and Clear.
    In Batch, run the sample and download it. Expand Settings to change currency
    or divisor; try underpayment, optional sound and the mobile layout.
