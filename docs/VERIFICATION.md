@@ -1,8 +1,18 @@
 # Verification
 
 Recorded September 21, 2026. Commands were executed by Codex; this is not a claim
-of independent human review. The AI also authored the tests. Source revision and
-clean-checkout evidence will be recorded after the final local commit.
+of independent human review. The AI also authored the tests. The source revision tested from a clean checkout was
+`abb03256d5725dd35780f2d1cae415a0f90249b0`. Subsequent changes only update
+verification/handoff documentation.
+
+## Clean-checkout verification
+
+Exported that commit using `git archive` into an empty temporary directory and
+selected Node v22.18.0 explicitly. `npm ci --offline --ignore-scripts` from the
+populated package cache, `npm run check`, and `npm run test:e2e` all exited 0.
+The clean copy had no existing dependencies or build output. Online `npm ci`
+also succeeded in the Linux Node 22 Docker build. Earlier development checks used
+Node v23.4.0. No claim is made that remote GitHub CI has run.
 
 ## Executed checks
 
@@ -22,20 +32,20 @@ Global coverage includes test code and is intentionally not used as a quality cl
 
 ## Requirement-to-test mapping
 
-| Behavior                             | Evidence                                                                                                                                                                                     |
-| ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exact decimal amounts                | `test/core.test.ts`: 0.29, leading zeros, maximum, huge values, negative/nonfinite/scientific forms, excess precision                                                                        |
-| Minimum physical pieces              | Independent DP recurrence compared with greedy for every amount 0..50,000 cents for each currency: 100,002 amounts total                                                                     |
-| Random selection based on owed cents | Contrasting cases where paid or change is divisible but owed is not; 3.33/5.00 selects random                                                                                                |
-| Random correctness                   | 5,000 reproducible generated cases per currency: exact sum, positive integer counts, valid denominations; controlled RNG boundaries and invalid RNG values                                   |
-| Bounded random work                  | Maximum supported change with a zero-valued RNG uses at most D−1 draws and terminates                                                                                                        |
-| New divisor, rule priority, EUR      | Configuration and first-match tests; additional rule without changing the processing code; explicit EUR output                                                                               |
-| Invalid strategy output              | Wrong totals, unknown/duplicate denominations, zero/negative/fractional/unsafe counts rejected                                                                                               |
-| File contract                        | LF/CRLF/BOM, final/no-final newline, empty file, blank rows, correct line numbers, exact singular/plural formatting                                                                          |
-| CLI I/O                              | Real executable and temp files; malformed later row creates no output; existing output and input protected; invalid UTF-8, size limit, help and argument failures                            |
-| HTTP boundary                        | Real local server and fetch: defaults, EUR/divisor, bad JSON/contracts, invalid values, UTF-8 parsing, content type, methods, request/input byte limits, security headers/static containment |
-| Browser workflow                     | Real API: sample/manual input, file upload, settings, exact file download, stale-result clearing, line error, network failure and recovery                                                   |
-| Large-file UI behavior               | 125 transactions render only 100 preview rows; downloaded output still contains all 125 rows; desktop and mobile                                                                             |
+| Behavior                             | Evidence                                                                                                                                                                      |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exact decimal amounts                | `test/core.test.ts`: 0.29, leading zeros, maximum, huge values, negative/nonfinite/scientific forms, excess precision                                                         |
+| Minimum physical pieces              | Independent DP recurrence compared with greedy for every amount 0..50,000 cents for each currency: 100,002 amounts total                                                      |
+| Random selection based on owed cents | Contrasting cases where paid or change is divisible but owed is not; 3.33/5.00 selects random                                                                                 |
+| Random correctness                   | 5,000 reproducible generated cases per currency: exact sum, positive integer counts, valid denominations; controlled RNG boundaries and invalid RNG values                    |
+| Bounded random work                  | Maximum supported change with a zero-valued RNG uses at most D−1 draws and terminates                                                                                         |
+| New divisor, rule priority, EUR      | Configuration and first-match tests; additional rule without changing the processing code; explicit EUR output                                                                |
+| Invalid strategy output              | Wrong totals, unknown/duplicate denominations, zero/negative/fractional/unsafe counts rejected                                                                                |
+| File contract                        | LF/CRLF/BOM, final/no-final newline, empty file, blank rows, correct line numbers, exact singular/plural formatting                                                           |
+| CLI I/O                              | Real executable and temp files; malformed later row creates no output; existing output and input protected; invalid UTF-8, size limit, help and argument failures             |
+| HTTP boundary                        | Real local server and fetch: defaults, EUR/divisor, bad JSON/contracts, invalid values, content type, methods, request/input byte limits, security headers/static containment |
+| Browser workflow                     | Real API: sample/manual input, file upload, settings, exact file download, stale-result clearing, line error, network failure and recovery                                    |
+| Large-file UI behavior               | 125 transactions render only 100 preview rows; downloaded output still contains all 125 rows; desktop and mobile                                                              |
 
 The DP oracle and seeded generator are verification code, not production
 dependencies. Seeded checks are repeatable examples across a wide range, not a

@@ -5,7 +5,9 @@ Target role: senior full-stack engineer; architect is a secondary possibility.
 The implementation includes a shared TypeScript core, file CLI, Node API, React
 UI, tests, container, CI configuration and AI-use documentation. The current demo
 is available at `http://127.0.0.1:3180` through a local read-only Docker container.
-It is not publicly deployed.
+It is not publicly deployed. The implementation is committed locally on
+`assessment/ed-anderson`; the clean-checkout source revision is recorded in
+`docs/VERIFICATION.md`.
 
 ## Review in five minutes
 
