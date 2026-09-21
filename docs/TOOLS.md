@@ -7,7 +7,7 @@
 | Implementation          | Codex and local editing/shell tools generated core, adapters, UI, configuration and docs            | No line-level human edits/review recorded yet                                |
 | Core verification       | Node test runner/TypeScript: examples, boundaries, DP oracle, deterministic randomized cases        | Personal inspection pending                                                  |
 | Adapter/UI verification | Node HTTP tests and Playwright Chromium: real files, requests and desktop/mobile scenarios          | Personal walkthrough pending                                                 |
-| Delivery                | npm lockfile, Prettier, Vite, Git, Docker and CI configuration                                      | Final submission decision pending                                            |
+| Delivery                | npm lockfile, Prettier, Vite, Git, Docker and CI configuration                                      | Ed authorized a PR ready for TrueFit's review                                |
 | Transcript              | OpenAI Docs skill and local export script: native bytes, SHA-256 manifest and readable derived view | Full raw log requested through the recruiter requirements                    |
 | Critique                | Codex drafted attributed technical observations                                                     | Ed reviewed, revised and finalized his critique                              |
 
