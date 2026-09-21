@@ -123,3 +123,20 @@ invented. OpenAPI and integration notes show the current contract and extension
 points. Authentication, schema, idempotency, retries and cross-service consistency
 remain decisions for actual integrations; a request ID does not imply exactly-once
 execution. Fakes verify these boundaries without connecting external services.
+
+## D17 — Final critique and explicitly redacted transcript
+
+Ed revised the self-critique himself, emphasized the welcoming skeuomorphic UI and
+service scaffold, and confirmed it was ready. Codex applied minor copy edits while
+preserving his points. The result records AI assistance and Ed's final revision.
+
+Ed explicitly requested sanitization of the full transcript before preparing the
+PR. The native snapshot is retained unchanged privately. The published JSONL keeps
+every event in order through a stated cutoff, replacing contact details, local
+identifiers/environment information, credentials, internal model/tool state and
+embedded media with explicit markers. Project-relative code references, public
+repo URLs, user/assistant discussion and tool records remain reviewable. The
+readable version is supplementary. The log is clearly labeled as redacted, with
+source/output hashes and event counts; it is not claimed to be an unmodified raw
+export. Generic rules and private identifier substitutions were tested and the
+actual artifacts scanned before publication.

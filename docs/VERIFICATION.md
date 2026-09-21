@@ -9,6 +9,21 @@ predates both revisions.
 Frontend source revision: `d513ecb0819f7440526947eb5d80c88749190951`.
 The follow-up documentation commit records this revision without changing code.
 
+## Submission preparation
+
+Ed revised and finalized his self-critique and authorized publication of a transcript
+with contact and identifying local environment details redacted. `npm run check`
+passed again with all 44 application tests and two new sanitizer tests. The sanitizer
+tests are now included in that command and therefore in GitHub Actions.
+
+The published transcript's manifest records its precise cutoff and source/output
+SHA-256 values. The artifact review compares native event counts/order and published
+file hashes, scans for contact/path/credential patterns and configured private
+identifiers, and confirms the original snapshot is excluded from Git. Internal
+model/tool state and embedded media carry explicit markers. The redacted log is
+not presented as an unmodified raw export. CI evidence for the pushed revision
+is available on the fork/PR; the historical local results below remain unchanged.
+
 ## Service scaffold checks
 
 Verified source revision: `eccbec00215aa971898f47dc3a3464d6781aeabf`.
@@ -173,4 +188,5 @@ mathematical proof or statistical demonstration of uniform randomness.
 - No concurrent production load, crash/disk-exhaustion fault injection, or
   penetration test was performed. Container runtime was exercised locally.
 - GitHub Actions configuration is included but has not run remotely before push.
-- Ed's code walkthrough, personal critique and final submission review are pending.
+- Ed revised and finalized his self-critique. Automated testing is not a claim of
+  independent human code review.

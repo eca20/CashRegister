@@ -1,0 +1,41 @@
+{
+  "exportedAt": "2026-09-21T16:56:24.851Z",
+  "sourceCutoff": "2026-09-21T16:54:03.106Z",
+  "sourceSha256": "3e5a593226fcd9e07c214f7220d1160ef455597ca6f555485ab1e914f33cd7d6",
+  "sourceByteCount": 8167668,
+  "sourceEventCount": 1236,
+  "publishedEventCount": 1236,
+  "files": {
+    "native-session.redacted.jsonl": {
+      "sha256": "b115fef2266402ee131cf4e6d4f0e232393a00b20a1ad7c13dc9f50b9b484035",
+      "byteCount": 4249140
+    },
+    "conversation.redacted.md": {
+      "sha256": "b7d781097e9c67af703a2477e064c98f58199333ca09c49ad2aa03ed287982e8",
+      "byteCount": 1202802
+    }
+  },
+  "redactions": {
+    "local identifier": 1832,
+    "local path": 347,
+    "internal tool/model state": 327,
+    "internal tool configuration": 6,
+    "local environment context": 8,
+    "local environment configuration": 158,
+    "email": 16,
+    "phone": 4,
+    "recruiter name": 28,
+    "recruiter location": 6,
+    "local process ID": 143,
+    "unrelated local project": 20,
+    "internal model data": 835,
+    "local endpoint": 532,
+    "local username": 291,
+    "project location": 637,
+    "embedded media": 30,
+    "credential": 6,
+    "local workspace": 4,
+    "local timezone": 4
+  },
+  "note": "All native events retained in original order, with explicit value redactions and JSON reserialization. This is not an unmodified raw export. The unmodified source is retained privately. The readable file is a derivative, not a replacement for the redacted native log. Messages after the source cutoff are not included."
+}

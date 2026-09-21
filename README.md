@@ -137,13 +137,13 @@ supplied the brief and role context, approved the approach, and directed the
 skeuomorphic revision: the page itself functions as the register. Human design
 feedback and pending code review are recorded separately.
 
-| Requested item             | Artifact                                                                                                |
-| -------------------------- | ------------------------------------------------------------------------------------------------------- |
-| Full raw prompt transcript | [Export/delivery notes](docs/ai/TRANSCRIPT.md); native snapshots prepared separately from public source |
-| Decision log               | [Decisions and attribution](docs/DECISIONS.md)                                                          |
-| Verification               | [Test evidence](docs/VERIFICATION.md)                                                                   |
-| Tools/task mapping         | [Tools](docs/TOOLS.md)                                                                                  |
-| Self-critique              | [Draft for Ed's review](docs/SELF_CRITIQUE.md)                                                          |
+| Requested item             | Artifact                                                                             |
+| -------------------------- | ------------------------------------------------------------------------------------ |
+| Full raw prompt transcript | [Full redacted transcript](docs/ai/TRANSCRIPT.md); exact original retained privately |
+| Decision log               | [Decisions and attribution](docs/DECISIONS.md)                                       |
+| Verification               | [Test evidence](docs/VERIFICATION.md)                                                |
+| Tools/task mapping         | [Tools](docs/TOOLS.md)                                                               |
+| Self-critique              | [Ed's self-critique](docs/SELF_CRITIQUE.md)                                          |
 
 [References](docs/REFERENCES.md) disclose prior-PR influence. The original brief is
-preserved unchanged. [Handoff](docs/HANDOFF.md) records remaining personal-review items.
+preserved unchanged. [Handoff](docs/HANDOFF.md) records submission and review guidance.

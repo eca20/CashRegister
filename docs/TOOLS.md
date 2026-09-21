@@ -9,7 +9,7 @@
 | Adapter/UI verification | Node HTTP tests and Playwright Chromium: real files, requests and desktop/mobile scenarios          | Personal walkthrough pending                                                 |
 | Delivery                | npm lockfile, Prettier, Vite, Git, Docker and CI configuration                                      | Final submission decision pending                                            |
 | Transcript              | OpenAI Docs skill and local export script: native bytes, SHA-256 manifest and readable derived view | Full raw log requested through the recruiter requirements                    |
-| Critique                | Codex drafted attributed technical observations                                                     | Ed's personal assessment still required                                      |
+| Critique                | Codex drafted attributed technical observations                                                     | Ed reviewed, revised and finalized his critique                              |
 
 One AI session and one model were used. No second model, subagent or independent
 human reviewer is claimed. The AI wrote both implementation and tests; passing
@@ -39,3 +39,11 @@ lifecycle scaffold and OpenAPI/integration documentation, and used Node tests wi
 fake repositories/services to check async behavior and failure semantics. Existing
 core/CLI tests and Chromium workflows provide regression evidence. No external
 service, database, paid platform, additional agent or new package was introduced.
+
+## Submission preparation
+
+Ed supplied his final self-critique and explicitly requested redaction of contact
+and local environment details before preparing the PR. Codex copy edited his text,
+created a reproducible sanitizer with tests, and retained the unmodified source
+privately. The public transcript carries redaction markers, checksums and a cutoff.
+GitHub CLI is used for the fork, branch, CI inspection and pull request.

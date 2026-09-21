@@ -15,10 +15,11 @@
     "test:e2e": "npm run build && playwright test",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "npm run format:check && npm run typecheck && npm test",
+    "check": "npm run format:check && npm run typecheck && npm test && npm run test:transcript",
     "start": "node dist/src/main.js",
     "serve": "node dist/src/serve.js",
-    "dev": "vite"
+    "dev": "vite",
+    "test:transcript": "node --test scripts/sanitize-transcript.test.mjs"
   },
   "devDependencies": {
     "@playwright/test": "1.63.0",
